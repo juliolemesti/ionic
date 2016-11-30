@@ -75,7 +75,7 @@ import { Platform } from '../../platform/platform';
   template:
     '<input [type]="type" [(ngModel)]="_value" (blur)="inputBlurred($event)" (focus)="inputFocused($event)" [placeholder]="placeholder" class="text-input" [ngClass]="\'text-input-\' + _mode">' +
     '<input [type]="type" aria-hidden="true" next-input *ngIf="_useAssist">' +
-    '<button ion-button clear [hidden]="!clearInput" type="button" class="text-input-clear-icon" (click)="clearTextInput()" (mousedown)="clearTextInput()"></button>' +
+    '<button ion-button clear [hidden]="!clearInput" type="button" class="text-input-clear-icon" (click)="clearTextInput($event)" (mousedown)="clearTextInput($event)"></button>' +
     '<div (touchstart)="pointerStart($event)" (touchend)="pointerEnd($event)" (mousedown)="pointerStart($event)" (mouseup)="pointerEnd($event)" class="input-cover" tappable *ngIf="_useAssist"></div>',
   encapsulation: ViewEncapsulation.None,
 })
@@ -199,6 +199,18 @@ export class TextInput extends InputBase {
   @Output() focus: EventEmitter<Event> = new EventEmitter<Event>();
 
   /**
+   * @output {event} Expression to call when the input has been cleared
+   */
+  @Output() clear: EventEmitter<Event> = new EventEmitter<Event>();
+
+  /**
+   * @private
+   */
+  inputCleared(ev: UIEvent) {
+    this.clear.emit(ev);
+  }
+
+  /**
    * @private
    */
   inputBlurred(ev: UIEvent) {
@@ -243,11 +255,12 @@ export class TextInput extends InputBase {
   /**
    * @private
    */
-  clearTextInput() {
+  clearTextInput(ev: UIEvent) {
     console.debug('Should clear input');
     this._value = '';
     this.onChange(this._value);
     this.writeValue(this._value);
+    this.inputCleared(ev);
   }
 }
 
